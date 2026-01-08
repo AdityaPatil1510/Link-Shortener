@@ -4,7 +4,7 @@ const Url = require("../models/Url");
 
 const router = express.Router();
 
-// Create short URL
+/*Create short URL*/
 router.post("/shorten", async (req, res) => {
     const { longUrl } = req.body;
 
@@ -18,19 +18,20 @@ router.post("/shorten", async (req, res) => {
         const url = new Url({
         longUrl,
         shortCode
-    });
+        });
 
-    await url.save();
+        await url.save();
 
-    res.status(201).json({
+        return res.status(201).json({
         shortUrl: `${process.env.BASE_URL}/${shortCode}`
         });
     } catch (error) {
-        res.status(500).json({ message: "Internal server error" });
+        console.error("POST /shorten error:", error.message);
+        return res.status(500).json({ message: "Internal server error" });
     }
 });
 
-// Redirect short URL
+/*Redirect short URL*/
 router.get("/:code", async (req, res) => {
     try {
         const url = await Url.findOne({ shortCode: req.params.code });
@@ -42,9 +43,10 @@ router.get("/:code", async (req, res) => {
         url.clicks++;
         await url.save();
 
-        res.redirect(url.longUrl);
+        return res.redirect(url.longUrl);
     } catch (error) {
-        res.status(500).json({ message: "Internal server error" });
+        console.error("GET /:code error:", error.message);
+        return res.status(500).json({ message: "Internal server error" });
     }
 });
 
